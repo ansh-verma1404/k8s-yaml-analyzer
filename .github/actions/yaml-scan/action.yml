@@ -1,0 +1,17 @@
+name: "K8s YAML Guardian"
+description: "Scan Kubernetes YAML files for schema, best practices, and security issues"
+author: "Ansh Verma"
+
+inputs:
+  path:
+    description: "Path to YAML file or directory to scan"
+    required: true
+    default: "."
+
+runs:
+  using: "docker"
+  image: "docker://ghcr.io/ansh-verma1404/k8s-yaml-analyzer-backend:latest"
+  args:
+    - "python"
+    - "/app/cli.py"
+    - "${{ inputs.path }}"

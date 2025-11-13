@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analyzer-backend
+  labels:
+    app: analyzer-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analyzer-backend
+  template:
+    metadata:
+      labels:
+        app: analyzer-backend
+    spec:
+      containers:
+        - name: backend
+          image: k8s-yaml-analyzer-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: analyzer-backend
+spec:
+  selector:
+    app: analyzer-backend
+  ports:
+    - port: 8000
+      targetPort: 8000
