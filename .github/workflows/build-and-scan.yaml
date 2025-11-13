@@ -1,37 +1,63 @@
-name: "Build & Scan Kubernetes YAMLs"
+name: Build & Push Images to GHCR
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
-  build-and-scan:
+
+  backend:
+    name: Build & Push Backend Image
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GitHub Container Registry
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GHCR_PAT }}
 
-      - name: Build Backend Image
+      - name: Build backend image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/k8s-yaml-analyzer-backend:latest -f backend/Dockerfile .
+          docker build -t ghcr.io/${{ github.repository_owner }}/k8s-yaml-analyzer-backend:latest backend
 
-      - name: Push Backend Image
+      - name: Push backend image
         run: |
-          docker push ghcr.io/${{ github.repository }}/k8s-yaml-analyzer-backend:latest
+          docker push ghcr.io/${{ github.repository_owner }}/k8s-yaml-analyzer-backend:latest
 
-      - name: Run Kubernetes YAML Scan
-        uses: ./.github/actions/yaml-scan
+  frontend:
+    name: Build & Push Frontend Image
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          path: "./tests/manifests"
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build frontend image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/k8s-yaml-analyzer-frontend:latest frontend
+
+      - name: Push frontend image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/k8s-yaml-analyzer-frontend:latest
