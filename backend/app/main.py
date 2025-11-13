@@ -27,3 +27,6 @@ async def on_startup():
 @app.get("/", include_in_schema=False)
 def root():
     return {"status": "ok", "service": "k8s-yaml-analyzer", "version": settings.APP_VERSION}
+@app.get("/health")
+def health():
+    return {"status": "ok"}

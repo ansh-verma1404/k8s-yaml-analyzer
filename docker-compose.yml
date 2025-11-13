@@ -6,12 +6,10 @@ services:
     container_name: k8s-analyzer-backend
     ports:
       - "8000:8000"
-    environment:
-      - ENV=production
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 3s
       retries: 5
     networks:
       - analyzer-net
@@ -22,7 +20,7 @@ services:
       dockerfile: Dockerfile
     container_name: k8s-analyzer-frontend
     ports:
-      - "8085:80"   # changed from 8080 to avoid conflict
+      - "8090:80"
     depends_on:
       backend:
         condition: service_healthy

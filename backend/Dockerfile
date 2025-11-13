@@ -1,9 +1,11 @@
 # backend/Dockerfile
 FROM python:3.11-slim
 
+LABEL org.opencontainers.image.source="https://github.com/ansh-verma1404/k8s-yaml-analyzer"
+
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-
+RUN apt-get update && apt-get install -y curl
 WORKDIR /app
 
 # system deps (minimal)
