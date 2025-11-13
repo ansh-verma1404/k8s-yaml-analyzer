@@ -1,0 +1,29 @@
+name: Publish Backend Image to GHCR
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build Backend Image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/k8s-yaml-analyzer-backend:latest backend
+
+      - name: Push Backend Image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/k8s-yaml-analyzer-backend:latest
+
