@@ -14,12 +14,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # copy project (we expect to build from repo root including backend/)
-COPY backend/requirements.txt /app/requirements.txt
+COPY requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r /app/requirements.txt
 
-COPY backend/app /app/app
-COPY backend/cli.py /app/cli.py
+COPY app /app/app
+COPY cli.py /app/cli.py
 
 EXPOSE 8000
 
