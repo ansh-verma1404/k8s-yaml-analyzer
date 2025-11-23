@@ -1,6 +1,6 @@
 # backend/app/analyzer/best_practices.py
 from typing import List, Dict, Any
-from app.api.v1.models import Finding
+from k8s_analyzer.api.v1.models import Finding
 
 def find_best_practices_issues(docs: List[Dict[str, Any]]) -> List[Finding]:
     findings = []

@@ -1,26 +1,22 @@
-# backend/Dockerfile
 FROM python:3.11-slim
 
 LABEL org.opencontainers.image.source="https://github.com/ansh-verma1404/k8s-yaml-analyzer"
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-RUN apt-get update && apt-get install -y curl
+
 WORKDIR /app
 
-# system deps (minimal)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential ca-certificates \
+    build-essential ca-certificates curl \
     && rm -rf /var/lib/apt/lists/*
 
-# copy project (we expect to build from repo root including backend/)
 COPY requirements.txt /app/requirements.txt
-RUN pip install --upgrade pip
-RUN pip install -r /app/requirements.txt
+RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 
-COPY app /app/app
+# Correct copy path
+COPY k8s_analyzer /app/k8s_analyzer
 COPY cli.py /app/cli.py
 
-EXPOSE 8000
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+EXPOSE 8443
+CMD ["uvicorn", "k8s_analyzer.main:app", "--host", "0.0.0.0", "--port", "8443"]
