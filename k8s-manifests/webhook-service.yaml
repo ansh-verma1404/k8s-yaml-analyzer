@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: analyzer-webhook
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8443
+      targetPort: 8443
+      protocol: TCP
+      name: https
+  selector:
+    app: analyzer-webhook

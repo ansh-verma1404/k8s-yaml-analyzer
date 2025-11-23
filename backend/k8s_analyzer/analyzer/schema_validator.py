@@ -1,7 +1,7 @@
 # backend/app/analyzer/schema_validator.py
 from typing import List, Dict, Any
-from app.utils.kubernetes_schema import basic_k8s_resource_checks
-from app.api.v1.models import Finding
+from k8s_analyzer.utils.kubernetes_schema import basic_k8s_resource_checks
+from k8s_analyzer.api.v1.models import Finding
 
 def validate_schema_for_docs(docs: List[Dict[str, Any]]) -> List[Finding]:
     """

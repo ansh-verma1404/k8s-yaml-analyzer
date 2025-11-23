@@ -3,12 +3,13 @@ from fastapi import APIRouter, File, UploadFile, Body, HTTPException
 from typing import Optional
 import logging
 
-from app.api.v1.models import ScanResult, Finding
-from app.analyzer.parser import parse_yaml_documents
-from app.analyzer.best_practices import find_best_practices_issues
-from app.analyzer.security_checks import find_security_issues
-from app.analyzer.schema_validator import validate_schema_for_docs
-from app.analyzer.report import build_report
+from k8s_analyzer.api.v1.models import ScanResult, Finding
+
+from k8s_analyzer.analyzer.parser import parse_yaml_documents
+from k8s_analyzer.analyzer.best_practices import find_best_practices_issues
+from k8s_analyzer.analyzer.security_checks import find_security_issues
+from k8s_analyzer.analyzer.schema_validator import validate_schema_for_docs
+from k8s_analyzer.analyzer.report import build_report
 
 logger = logging.getLogger("k8s-yaml-analyzer.api")
 
