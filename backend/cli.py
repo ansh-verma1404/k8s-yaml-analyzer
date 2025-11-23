@@ -13,11 +13,11 @@ Exit codes:
 import sys
 import json
 from typing import List
-from app.analyzer.parser import parse_yaml_documents
-from app.analyzer.schema_validator import validate_schema_for_docs
-from app.analyzer.best_practices import find_best_practices_issues
-from app.analyzer.security_checks import find_security_issues
-from app.analyzer.report import build_report
+from k8s_analyzer.analyzer.parser import parse_yaml_documents
+from k8s_analyzer.analyzer.schema_validator import validate_schema_for_docs
+from k8s_analyzer.analyzer.best_practices import find_best_practices_issues
+from k8s_analyzer.analyzer.security_checks import find_security_issues
+from k8s_analyzer.analyzer.report import build_report
 
 def scan_text(text: str):
     docs = parse_yaml_documents(text)

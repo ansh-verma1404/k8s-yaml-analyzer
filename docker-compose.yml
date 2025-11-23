@@ -1,13 +1,14 @@
 services:
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: k8s-analyzer-backend
     ports:
       - "8000:8000"
+
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8443/health"]
       interval: 5s
       timeout: 3s
       retries: 5

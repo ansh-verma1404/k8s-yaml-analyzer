@@ -5,22 +5,30 @@ LABEL org.opencontainers.image.source="https://github.com/ansh-verma1404/k8s-yam
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-RUN apt-get update && apt-get install -y curl
+
+# Application folder
 WORKDIR /app
 
-# system deps (minimal)
+# Install system deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential ca-certificates \
+    build-essential ca-certificates curl \
     && rm -rf /var/lib/apt/lists/*
 
-# copy project (we expect to build from repo root including backend/)
-COPY backend/requirements.txt /app/requirements.txt
-RUN pip install --upgrade pip
-RUN pip install -r /app/requirements.txt
+# Copy requirements FIRST for build caching
+COPY requirements.txt /app/requirements.txt
+RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 
-COPY backend/app /app/app
-COPY backend/cli.py /app/cli.py
+# -------------------------------
+# 🔥 CRITICAL FIX
+# Copy code to the correct path:
+# /app/app/
+# -------------------------------
+COPY k8s_analyzer /app/k8s_analyzer
 
-EXPOSE 8000
+COPY cli.py /app/cli.py
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Expose webhook port (8443)
+EXPOSE 8443
+
+# K8s Deployment overrides SSL params
+CMD ["uvicorn", "k8s_analyzer.main:app", "--host", "0.0.0.0", "--port", "8443"]

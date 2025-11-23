@@ -1,45 +1,39 @@
-import { useState } from "react";
-import FileUploader from "./components/FileUploader";
-import FindingsTable from "./components/FindingsTable";
-import YamlViewer from "./components/YamlViewer";
-import type { ScanResult } from "./types";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+
+import WebUI from "./pages/WebUI";
+import CLITool from "./pages/CLITool";
+import GitHubAction from "./pages/GitHubAction";
+import DockerUsage from "./pages/DockerUsage";
+import AdmissionController from "./pages/AdmissionController";
+
 import "./index.css";
 
-function App() {
-  const [result, setResult] = useState<ScanResult | null>(null);
-  const [yamlText, setYamlText] = useState<string>("");
-
+// ---- Navigation Bar ----
+function NavBar() {
   return (
-    <div className="app">
-      <h1>K8s YAML Analyzer</h1>
-      <p>Upload a Kubernetes YAML to validate and visualize findings.</p>
-
-      <FileUploader
-        onResult={(res, text) => {
-          setResult(res);
-          setYamlText(text);
-        }}
-      />
-
-      {result && (
-        <>
-          <div>
-            <h2>Summary</h2>
-            <ul style={{ display: "flex", gap: "1rem", listStyle: "none" }}>
-              {Object.entries(result.summary).map(([sev, count]) => (
-                <li key={sev}>
-                  <strong>{sev}</strong>: {count}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <FindingsTable findings={result.findings} />
-          <YamlViewer yamlText={yamlText} />
-        </>
-      )}
+    <div className="navbar">
+      <Link to="/">Web UI</Link>
+      <Link to="/cli">CLI Tool</Link>
+      <Link to="/github">GitHub Action</Link>
+      <Link to="/docker">Docker Image</Link>
+      <Link to="/admission">Admission Controller</Link>
     </div>
   );
 }
 
-export default App;
+// ---- App Shell ----
+export default function App() {
+  return (
+    <Router>
+      <NavBar />
+      <Routes>
+        <Route path="/" element={<WebUI />} />
+        <Route path="/cli" element={<CLITool />} />
+        <Route path="/github" element={<GitHubAction />} />
+        <Route path="/docker" element={<DockerUsage />} />
+        <Route path="/admission" element={<AdmissionController />} />
+      </Routes>
+    </Router>
+  );
+}
+

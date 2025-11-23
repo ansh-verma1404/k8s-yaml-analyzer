@@ -1,6 +1,6 @@
 # backend/app/utils/kubernetes_schema.py
 from typing import Dict, Any, List
-from app.api.v1.models import Finding
+from k8s_analyzer.api.v1.models import Finding
 
 def basic_k8s_resource_checks(doc: Dict[str, Any], doc_index: int) -> List[Finding]:
     """
