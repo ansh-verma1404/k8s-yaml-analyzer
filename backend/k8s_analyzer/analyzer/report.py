@@ -1,6 +1,6 @@
 # backend/app/analyzer/report.py
 from typing import List, Dict
-from app.api.v1.models import ScanResult, Finding
+from k8s_analyzer.api.v1.models import ScanResult, Finding
 from collections import Counter
 
 def build_report(findings_list: List[Finding]) -> ScanResult:

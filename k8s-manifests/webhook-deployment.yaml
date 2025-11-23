@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: analyzer-webhook
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -13,27 +14,29 @@ spec:
         app: analyzer-webhook
     spec:
       containers:
-        - name: webhook
-          image: k8s-yaml-analyzer-backend:latest
-          command: ["uvicorn", "app.admission.webhook_handler:app", "--host", "0.0.0.0", "--port", "8443"]
+        - name: analyzer-webhook
+          image: k8s-yaml-analyzer-backend:0.1.0
+
+          imagePullPolicy: Never
+          args:
+            - "uvicorn"
+            - "k8s_analyzer.main:app"
+            - "--host"
+            - "0.0.0.0"
+            - "--port"
+            - "8443"
+            - "--ssl-keyfile"
+            - "/certs/tls.key"
+            - "--ssl-certfile"
+            - "/certs/tls.crt"
           ports:
             - containerPort: 8443
+              name: https
           volumeMounts:
-            - name: webhook-certs
+            - name: tls-certs
               mountPath: /certs
               readOnly: true
       volumes:
-        - name: webhook-certs
+        - name: tls-certs
           secret:
             secretName: analyzer-webhook-tls
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: analyzer-webhook
-spec:
-  selector:
-    app: analyzer-webhook
-  ports:
-    - port: 443
-      targetPort: 8443

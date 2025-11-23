@@ -17,7 +17,7 @@ const badgeColor = (sev: string) => {
     case "LOW":
       return "bg-green-400 text-black";
     default:
-      return "bg-gray-400 text-black";
+      return "bg-gray-500 text-white";
   }
 };
 
@@ -31,7 +31,7 @@ const FindingsTable: React.FC<Props> = ({ findings }) => {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <div className="flex-header">
         <h2>Findings</h2>
         <select value={filter} onChange={(e) => setFilter(e.target.value)}>
           <option value="ALL">All Severities</option>
