@@ -47,8 +47,9 @@ def main(argv: List[str]):
             return 1
 
     report = build_report(overall_findings)
-    # print JSON report
-    print(report.json(indent=2, ensure_ascii=False))
+ 
+    print(json.dumps(report.model_dump(), indent=2, ensure_ascii=False))
+
 
     # determine exit code: 3=CRITICAL,2=HIGH/MEDIUM,0 otherwise
     if report.summary.get("CRITICAL", 0) > 0:
