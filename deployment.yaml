@@ -17,6 +17,7 @@ spec:
           image: nginx:1.21
           securityContext:
             runAsNonRoot: true
+            runAsUser: 1000        # ensure NOT running as root
             readOnlyRootFilesystem: true
           resources:
             requests:
@@ -25,3 +26,17 @@ spec:
             limits:
               cpu: "250m"
               memory: "256Mi"
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
