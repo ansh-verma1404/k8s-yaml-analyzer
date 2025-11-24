@@ -25,7 +25,9 @@ jobs:
 
     - name: Fail pipeline if HIGH or CRITICAL exists
       run: |
-        if grep -q '"HIGH"' findings.json || grep -q '"CRITICAL"' findings.json; then
+        CRIT=$(jq '.summary.CRITICAL' findings.json)
+        HIGH=$(jq '.summary.HIGH' findings.json)
+        if [ "$CRIT" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
           echo "❌ High/Critical vulnerabilities detected. Build blocked."
           exit 1
         fi
