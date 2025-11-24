@@ -2,9 +2,8 @@ name: K8s YAML Analyzer CI
 
 on:
   push:
-    paths:
-      - "**/*.yaml"
-      - "**/*.yml"
+    branches:
+      - "**"
   pull_request:
 
 jobs:
@@ -12,35 +11,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-    - name: Identify target YAML
+    - name: Detect modified YAML file
+      id: detect
       run: |
-        if [ -f "deployment.yaml" ]; then
-          echo "TARGET=deployment.yaml" >> $GITHUB_ENV
-        else
-          echo "❌ deployment.yaml not found. Failing CI."
-          exit 1
+        FILE=$(git diff --name-only HEAD~1 | grep -E '\.ya?ml$' | head -n 1 || true)
+        if [ -z "$FILE" ]; then
+          echo "No YAML files modified."
+          exit 0
         fi
+        echo "yaml_file=$FILE" >> $GITHUB_OUTPUT
+        echo "Scanning: $FILE"
 
-    - name: Run YAML Analyzer
+    - name: Run analyzer
       run: |
         docker run --platform linux/amd64 \
           -v ${{ github.workspace }}:/scan \
           ghcr.io/ansh-verma1404/k8s-yaml-analyzer-backend:latest \
-          python /app/cli.py /scan/${{ env.TARGET }} > findings.json
-        echo "===== Analyzer Output ====="
+          python /app/cli.py /scan/${{ steps.detect.outputs.yaml_file }} > findings.json
         cat findings.json
 
-    - name: Fail CI if HIGH or CRITICAL findings exist
+    - name: Fail build on HIGH or CRITICAL
       run: |
-        CRITICAL=$(grep -o '"CRITICAL"' findings.json | wc -l)
-        HIGH=$(grep -o '"HIGH"' findings.json | wc -l)
-
-        if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
-          echo "❌ High/Critical misconfigurations found — blocking build."
+        if grep -q '"HIGH"' findings.json || grep -q '"CRITICAL"' findings.json; then
+          echo "❌ Build blocked — High/Critical vulnerabilities detected."
           exit 1
         fi
-
-        echo "✔️ Deployment YAML is safe — CI passed."
+        echo "✔️ Build allowed — No high vulnerabilities found."
