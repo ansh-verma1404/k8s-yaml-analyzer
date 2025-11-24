@@ -15,19 +15,32 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Run analyzer against YAML manifests
+    - name: Identify target YAML
+      run: |
+        if [ -f "deployment.yaml" ]; then
+          echo "TARGET=deployment.yaml" >> $GITHUB_ENV
+        else
+          echo "❌ deployment.yaml not found. Failing CI."
+          exit 1
+        fi
+
+    - name: Run YAML Analyzer
       run: |
         docker run --platform linux/amd64 \
           -v ${{ github.workspace }}:/scan \
           ghcr.io/ansh-verma1404/k8s-yaml-analyzer-backend:latest \
-          python /app/cli.py /scan/tests/insecure.yaml > findings.json
+          python /app/cli.py /scan/${{ env.TARGET }} > findings.json
         echo "===== Analyzer Output ====="
         cat findings.json
 
-    - name: Fail pipeline if HIGH or CRITICAL exists
+    - name: Fail CI if HIGH or CRITICAL findings exist
       run: |
-        if grep -q '"HIGH"' findings.json || grep -q '"CRITICAL"' findings.json; then
-          echo "❌ High/Critical vulnerabilities detected. Build blocked."
+        CRITICAL=$(grep -o '"CRITICAL"' findings.json | wc -l)
+        HIGH=$(grep -o '"HIGH"' findings.json | wc -l)
+
+        if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+          echo "❌ High/Critical misconfigurations found — blocking build."
           exit 1
         fi
-        echo "✔️ No high vulnerabilities — Build allowed."
+
+        echo "✔️ Deployment YAML is safe — CI passed."
