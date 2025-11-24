@@ -15,12 +15,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Run analyzer against YAML manifests
+    - name: Detect modified YAML file
+      run: |
+        FILE=$(git diff --name-only HEAD~1 | grep -E '\.ya?ml$' | head -n 1)
+        echo "TARGET_FILE=$FILE" >> $GITHUB_ENV
+        echo "🔍 Scanning: $FILE"
+
+    - name: Run analyzer
       run: |
         docker run --platform linux/amd64 \
           -v ${{ github.workspace }}:/scan \
           ghcr.io/ansh-verma1404/k8s-yaml-analyzer-backend:latest \
-          python /app/cli.py /scan/deployment.yaml > findings.json
+          python /app/cli.py /scan/${{ env.TARGET_FILE }} > findings.json
         echo "===== Analyzer Output ====="
         cat findings.json
 
@@ -30,4 +36,4 @@ jobs:
           echo "❌ High/Critical vulnerabilities detected. Build blocked."
           exit 1
         fi
-        echo "✔️ No high vulnerabilities — Build allowed."
+        echo "✔️ YAML is secure — Build approved."
