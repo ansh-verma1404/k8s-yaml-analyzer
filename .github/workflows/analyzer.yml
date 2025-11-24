@@ -1,0 +1,33 @@
+name: K8s YAML Analyzer CI
+
+on:
+  push:
+    paths:
+      - "**/*.yaml"
+      - "**/*.yml"
+  pull_request:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Run analyzer against YAML manifests
+      run: |
+        docker run --platform linux/amd64 \
+          -v ${{ github.workspace }}:/scan \
+          ghcr.io/ansh-verma1404/k8s-yaml-analyzer-backend:latest \
+          python /app/cli.py /scan/tests/insecure.yaml > findings.json
+        echo "===== Analyzer Output ====="
+        cat findings.json
+
+    - name: Fail pipeline if HIGH or CRITICAL exists
+      run: |
+        if grep -q '"HIGH"' findings.json || grep -q '"CRITICAL"' findings.json; then
+          echo "❌ High/Critical vulnerabilities detected. Build blocked."
+          exit 1
+        fi
+        echo "✔️ No high vulnerabilities — Build allowed."
