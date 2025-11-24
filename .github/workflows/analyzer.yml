@@ -11,31 +11,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    - name: Detect modified YAML file
-      id: detect
-      run: |
-        FILE=$(git diff --name-only HEAD~1 | grep -E '\.ya?ml$' | head -n 1 || true)
-        if [ -z "$FILE" ]; then
-          echo "No YAML files modified."
-          exit 0
-        fi
-        echo "yaml_file=$FILE" >> $GITHUB_OUTPUT
-        echo "Scanning: $FILE"
-
-    - name: Run analyzer
+    - name: Run Analyzer on deployment.yaml
       run: |
         docker run --platform linux/amd64 \
           -v ${{ github.workspace }}:/scan \
           ghcr.io/ansh-verma1404/k8s-yaml-analyzer-backend:latest \
-          python /app/cli.py /scan/${{ steps.detect.outputs.yaml_file }} > findings.json
+          python /app/cli.py /scan/deployment.yaml > findings.json
+        echo "===== Analyzer Output ====="
         cat findings.json
 
-    - name: Fail build on HIGH or CRITICAL
+    - name: Fail pipeline if HIGH or CRITICAL exists
       run: |
         if grep -q '"HIGH"' findings.json || grep -q '"CRITICAL"' findings.json; then
-          echo "❌ Build blocked — High/Critical vulnerabilities detected."
+          echo "❌ High/Critical vulnerabilities detected. Build blocked."
           exit 1
         fi
-        echo "✔️ Build allowed — No high vulnerabilities found."
+        echo "✔️ No high vulnerabilities detected — Build allowed."
