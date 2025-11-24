@@ -14,19 +14,29 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Run Analyzer on deployment.yaml
+    - name: Select YAML based on branch
+      run: |
+        if [[ "${GITHUB_REF##*/}" == "ci-test-secure" ]]; then
+          echo "YAML_FILE=tests/valid-deployment.yaml" >> $GITHUB_ENV
+        else
+          echo "YAML_FILE=tests/insecure.yaml" >> $GITHUB_ENV
+        fi
+        echo "Scanning YAML: $YAML_FILE"
+
+    - name: Run analyzer
       run: |
         docker run --platform linux/amd64 \
           -v ${{ github.workspace }}:/scan \
           ghcr.io/ansh-verma1404/k8s-yaml-analyzer-backend:latest \
-          python /app/cli.py /scan/deployment.yaml > findings.json
-        echo "===== Analyzer Output ====="
-        cat findings.json
+          python /app/cli.py /scan/${{ env.YAML_FILE }} > findings.json
 
-    - name: Fail pipeline if HIGH or CRITICAL exists
-      run: |
-        if grep -q '"HIGH"' findings.json || grep -q '"CRITICAL"' findings.json; then
-          echo "❌ High/Critical vulnerabilities detected. Build blocked."
-          exit 1
-        fi
-        echo "✔️ No high vulnerabilities detected — Build allowed."
+        - name: Fail pipeline if HIGH or CRITICAL exists
+        run: |
+          HIGH=$(jq '.summary.HIGH' findings.json)
+          CRITICAL=$(jq '.summary.CRITICAL' findings.json)
+          if [ "$HIGH" -gt 0 ] || [ "$CRITICAL" -gt 0 ]; then
+            echo "❌ High/Critical vulnerabilities detected. Build blocked."
+            exit 1
+          fi
+          echo "✔️ No high vulnerabilities — Build allowed."
+
