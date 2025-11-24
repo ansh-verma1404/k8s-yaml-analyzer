@@ -1,27 +1,17 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
-  name: secure-app
+  name: insecure-pod
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: secure-app
-  template:
-    metadata:
-      labels:
-        app: secure-app
-    spec:
-      containers:
-        - name: secure-container
-          image: nginx:1.21
-          securityContext:
-            runAsNonRoot: true
-            readOnlyRootFilesystem: true
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "250m"
-              memory: "256Mi"
+  containers:
+    - name: bad-container
+      image: nginx:latest
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: /host
+          name: host-volume
+  volumes:
+    - name: host-volume
+      hostPath:
+        path: /
