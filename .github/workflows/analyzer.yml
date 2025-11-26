@@ -15,26 +15,37 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Run analyzer against deployment.yaml
+    - name: Detect modified YAML
+      id: detect
       run: |
-        if [ ! -f "${{ github.workspace }}/deployment.yaml" ]; then
-          echo "❌ deployment.yaml not found. Nothing to scan."
-          exit 1
+        FILE=$(git diff --name-only HEAD~1 | grep -E '\.ya?ml$' | head -n 1)
+        echo "file=$FILE" >> $GITHUB_OUTPUT
+        echo "Detected YAML: $FILE"
+
+    - name: Fail if no YAML found
+      run: |
+        if [ -z "${{ steps.detect.outputs.file }}" ]; then
+          echo "No YAML changed — exiting safely."
+          exit 0
         fi
+
+    - name: Run Analyzer
+      run: |
+        FILE=${{ steps.detect.outputs.file }}
+        echo "Scanning file: $FILE"
 
         docker run --platform linux/amd64 \
           -v ${{ github.workspace }}:/scan \
           ghcr.io/ansh-verma1404/k8s-yaml-analyzer-backend:latest \
-          python /app/cli.py /scan/deployment.yaml > findings.json
+          python /app/cli.py /scan/$FILE > findings.json
 
-        echo "===== Analyzer Output ====="
+        echo "--- Analyzer Output ---"
         cat findings.json
 
-    - name: Fail pipeline if HIGH or CRITICAL exists
+    - name: Fail on HIGH or CRITICAL
       run: |
         if grep -q '"HIGH"' findings.json || grep -q '"CRITICAL"' findings.json; then
-          echo "❌ High/Critical vulnerabilities detected. Build blocked."
+          echo "❌ Vulnerabilities found — CI FAILED"
           exit 1
         fi
-
-        echo "✔️ No high vulnerabilities — Build allowed."
+        echo "✔️ No high vulnerabilities — CI PASSED"
