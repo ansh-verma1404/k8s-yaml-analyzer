@@ -17,10 +17,16 @@ jobs:
 
     - name: Run analyzer against deployment.yaml
       run: |
+        if [ ! -f "${{ github.workspace }}/deployment.yaml" ]; then
+          echo "❌ deployment.yaml not found. Nothing to scan."
+          exit 1
+        fi
+
         docker run --platform linux/amd64 \
           -v ${{ github.workspace }}:/scan \
           ghcr.io/ansh-verma1404/k8s-yaml-analyzer-backend:latest \
           python /app/cli.py /scan/deployment.yaml > findings.json
+
         echo "===== Analyzer Output ====="
         cat findings.json
 
@@ -30,4 +36,5 @@ jobs:
           echo "❌ High/Critical vulnerabilities detected. Build blocked."
           exit 1
         fi
+
         echo "✔️ No high vulnerabilities — Build allowed."
