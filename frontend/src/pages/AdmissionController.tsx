@@ -4,20 +4,24 @@ export default function AdmissionController() {
       <h1>Kubernetes Admission Controller</h1>
       <p>Block insecure YAML at deployment-time in your cluster.</p>
 
-      <h2>Install Webhook</h2>
+      <h2>Deploy Webhook backend</h2>
       <pre>
-{`kubectl apply -f admission-controller.yaml`}
+{'kubectl apply -f webhook-deployment.yaml  kubectl apply -f webhook-service.yaml'}
       </pre>
 
       <h2>Flow</h2>
       <pre>
-{`kubectl apply -> K8s API Server -> Webhook (Analyzer) -> Allow/Deny`}
+{`kubectl create secret tls webhook-tls \
+  --cert=tls.crt \
+  --key=tls.key \
+  -n <namespace-name>
+`}
       </pre>
 
-      <h2>Example Rejection</h2>
+      <h2>Install webhook configuration</h2>
       <pre>
-{`ERROR: privileged container blocked
-Reason: Violates security best practices`}
+{`kubectl apply -f webhook-config.yaml
+`}
       </pre>
     </div>
   );
