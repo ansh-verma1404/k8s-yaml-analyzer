@@ -16,7 +16,7 @@ logger = logging.getLogger("k8s-yaml-analyzer.api")
 router = APIRouter()
 
 @router.post("/scan", response_model=ScanResult)
-async def scan(file: UploadFile = File(None), raw_yaml: Optional[str] = Body(None, media_type="text/plain")):
+async def scan(file: UploadFile = File(None), raw_yaml: Optional[str] = Body(None)):
     """
     Scan uploaded YAML file or raw YAML text for schema, security and best-practice issues.
     Provide either multipart file upload (file) or raw YAML text (raw_yaml).
