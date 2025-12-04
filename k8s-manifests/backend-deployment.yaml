@@ -33,5 +33,5 @@ spec:
   selector:
     app: analyzer-backend
   ports:
-    - port: 8000
-      targetPort: 8000
+    - port: 8443
+      targetPort: 8443

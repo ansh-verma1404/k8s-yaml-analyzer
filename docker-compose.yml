@@ -1,12 +1,9 @@
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/ansh-verma1404/k8s-yaml-analyzer-backend:latest
     container_name: k8s-analyzer-backend
     ports:
-      - "8000:8000"
-
+      - "8443:8443"   # backend actually runs on port 8443
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8443/health"]
       interval: 5s

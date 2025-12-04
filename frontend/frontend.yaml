@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analyzer-frontend
+  namespace: default
+  labels:
+    app: analyzer-frontend
+    skip-webhook: "true"     # important to avoid webhook blocking
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analyzer-frontend
+  template:
+    metadata:
+      labels:
+        app: analyzer-frontend
+        skip-webhook: "true"
+    spec:
+      containers:
+      - name: frontend
+        image: ghcr.io/ansh-verma1404/k8s-yaml-analyzer-frontend:0.1.4
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 80

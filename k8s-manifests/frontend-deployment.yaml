@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: k8s-yaml-analyzer-frontend:latest
-          imagePullPolicy: IfNotPresent
+          image:  ghcr.io/ansh-verma1404/k8s-yaml-analyzer-frontend:0.1.3
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
 ---

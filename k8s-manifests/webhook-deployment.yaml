@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: analyzer-webhook
   namespace: default
+  labels:
+    app: analyzer-webhook
+    skip-webhook: "true"    # <--- IMPORTANT: do not validate yourself
 spec:
   replicas: 1
   selector:
@@ -12,12 +15,13 @@ spec:
     metadata:
       labels:
         app: analyzer-webhook
+        skip-webhook: "true"   # <--- also on pod template
     spec:
       containers:
         - name: analyzer-webhook
-          image: k8s-yaml-analyzer-backend:0.1.0
-
-          imagePullPolicy: Never
+          image: ghcr.io/ansh-verma1404/k8s-yaml-analyzer-backend:v20251204-1
+          imagePullPolicy: IfNotPresent
+          
           args:
             - "uvicorn"
             - "k8s_analyzer.main:app"
@@ -29,13 +33,16 @@ spec:
             - "/certs/tls.key"
             - "--ssl-certfile"
             - "/certs/tls.crt"
+
           ports:
             - containerPort: 8443
               name: https
+
           volumeMounts:
             - name: tls-certs
               mountPath: /certs
               readOnly: true
+
       volumes:
         - name: tls-certs
           secret:

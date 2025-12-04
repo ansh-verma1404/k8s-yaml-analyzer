@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analyzer-backend
+  labels:
+    app: analyzer-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analyzer-backend
+  template:
+    metadata:
+      labels:
+        app: analyzer-backend
+    spec:
+      containers:
+      - name: backend
+        image: ghcr.io/ansh-verma1404/k8s-yaml-analyzer-backend:v20251204-1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8443
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
