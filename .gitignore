@@ -1,0 +1,49 @@
+# --- SECURITY: Never commit TLS/Private Keys ---
+*.key
+*.crt
+*.pem
+*.der
+certs/
+secrets/
+*.p12
+*.csr
+
+# --- Python backend ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+.env
+.env.*
+.venv/
+venv/
+
+# --- Node / Frontend ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Kubernetes & Build artifacts ---
+*.yaml.save
+*.yaml.bak
+*.log
+*.tmp
+
+# --- OS / Editor junk ---
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# --- Docker ---
+*.tar
+docker-compose.override.yml
