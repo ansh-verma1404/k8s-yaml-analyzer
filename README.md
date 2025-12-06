@@ -1,169 +1,122 @@
-Kubernetes YAML Analyzer & Admission Controller
+🚀 Kubernetes YAML Analyzer & Admission Controller
 
-A complete static analysis and policy enforcement system for Kubernetes manifests.
+A production-grade Kubernetes manifest analyzer that scans YAML for:
 
-🚀 Overview
-
-The Kubernetes YAML Analyzer is an open-source tool that validates Kubernetes YAML files for:
-
-Schema correctness
-
-Best practices
+Schema validation
 
 Security misconfigurations
 
-Image tag policies
+Best-practice violations
 
-Admission-time enforcement using a Kubernetes Mutating/Validating Webhook
+Policy enforcement via Admission Webhook
 
-It includes two major components:
+CI/CD pipeline integration
 
-Static Analyzer API — FastAPI backend that accepts YAML and returns structured findings
+This project contains three core components:
 
-Frontend Web UI — React + Vite UI to upload YAML and view analysis results
+1️⃣ Analyzer Engine (FastAPI Backend)
 
-Admission Controller — Kubernetes webhook that blocks insecure deployments (e.g., :latest, privileged containers)
-
-🧩 Features
-🔍 Static Analysis (API + CLI)
-
-Detects bad practices like missing resource limits
-
-Flags security issues (privileged container, hostPath, root user, insecure Secret data)
-
-Reports schema errors
-
-Groups results by severity: CRITICAL / HIGH / MEDIUM / LOW
-
-Provides JSON output for CI/CD pipelines
-
-🖥️ Web UI
-
-Upload YAML files
-
-View structured analysis table
-
-Visual severity summary
-
-Live proxy to backend for instant scanning
-
-🛡️ Admission Controller (Webhook)
-
-Denies Pods/Deployments using:
-
-:latest tag
-
-No image tag
+Runs deep analysis on Kubernetes YAML, detecting issues such as:
 
 Privileged containers
 
-Other bad security practices
+Dangerous hostPath mounts
 
-Enforces cluster-wide policy
+Missing resource limits
 
-🏗️ Architecture
-┌───────────────────────────────────────────┐
-│                 Frontend                  │
-│       (React + Vite + NGINX)              │
-│  Upload YAML → /api/v1/scan → Show Report │
-└───────────────────────────────────────────┘
-                 │   (ClusterIP)
-                 ▼
-┌───────────────────────────────────────────┐
-│              Backend API                  │
-│     FastAPI / Uvicorn (port 8443)         │
-│  - Schema Validation                       │
-│  - Best Practices Checks                   │
-│  - Security Checks                         │
-└───────────────────────────────────────────┘
-                 │
-                 ▼
-┌───────────────────────────────────────────┐
-│        Kubernetes Admission Webhook        │
-│      Validates deployments in-cluster       │
-└───────────────────────────────────────────┘
+Unknown or deprecated API versions
 
-📦 Installation (Kubernetes)
-1️⃣ Deploy Backend
-kubectl apply -f k8s-manifests/backend-deployment.yaml
-kubectl apply -f k8s-manifests/backend-service.yaml
+Containers running as root
 
-2️⃣ Deploy Frontend
-kubectl apply -f k8s-manifests/frontend-deployment.yaml
-kubectl apply -f k8s-manifests/frontend-service.yaml
+hostNetwork / hostPID misuse
 
+The analyzer returns structured security findings with severity ranking (CRITICAL → LOW).
 
-Access UI:
+2️⃣ Web UI (React + Vite)
 
-minikube service analyzer-frontend
+A user-friendly browser interface to:
 
-3️⃣ Create TLS Secret for Webhook
-kubectl create secret tls analyzer-webhook-tls \
-  --cert=tls.crt \
-  --key=tls.key \
-  -n default
+✔ Upload YAML
+✔ View misconfigurations
+✔ Detailed findings table
+✔ Syntax-highlighted YAML viewer
 
-4️⃣ Deploy Webhook Backend
-kubectl apply -f k8s-manifests/webhook-deployment.yaml
-kubectl apply -f k8s-manifests/webhook-service.yaml
+The UI proxies requests to the backend service running inside the cluster.
 
-5️⃣ Install ValidatingWebhookConfiguration
-kubectl apply -f k8s-manifests/webhook-configuration.yaml
+3️⃣ Kubernetes Admission Webhook
 
-🧪 CLI Usage
-python cli.py example.yaml
+A validating admission webhook that:
 
+Intercepts YAML before it is deployed
 
-Exit codes:
+Blocks insecure manifests (e.g., image:latest, privileged pods)
 
-Code	Meaning
-0	OK (only LOW or none)
-2	MEDIUM or HIGH findings detected
-3	CRITICAL findings detected
-💡 Example Finding Output
-{
-  "summary": {
-    "CRITICAL": 1,
-    "HIGH": 2,
-    "MEDIUM": 1,
-    "LOW": 3
-  },
-  "findings": [
-    {
-      "severity": "HIGH",
-      "rule_id": "SEC002",
-      "message": "Container 'nginx' is privileged",
-      "path": "spec.containers[0].securityContext.privileged"
-    }
-  ]
-}
+Integrates with any Kubernetes cluster
 
-🛠️ Development
-Start Backend Locally
-uvicorn k8s_analyzer.main:app --reload --port 8443
+Works alongside Gatekeeper/Kyverno as a lightweight alternative
 
-Start Frontend Locally
-npm install
-npm run dev
+Supports TLS with your own CA bundle
 
-🤝 Contributing
+Additional Features
 
-Pull requests are welcome!
-Good areas to contribute:
+🔹 CI/CD Plugin Mode
+Use the included CLI or Docker image inside GitHub Actions, GitLab CI, Argo, Jenkins, etc.
 
-Additional security rules
+🔹 Cluster-Local Deployment
+Full Kubernetes objects included:
+Deployment, Service, MutatingWebhookConfiguration, TLS generation.
 
-Additional schema validations
+🔹 Offline Mode
+The analyzer runs without contacting the Kubernetes API, making it ideal for CI jobs.
 
-Improved UI/UX
+🧩 Why This Project Exists
 
-CI integration workflows
+Kubernetes YAML is powerful but error-prone.
+A single misconfigured manifest can lead to:
 
-📄 License
+Security breaches
 
-MIT License — free for personal and commercial use.
+Production outages
 
-📢 Author
+Pods stuck in CrashLoopBackOff
 
-Ansh Verma
-GitHub: https://github.com/ansh-verma1404
+Unbounded CPU/memory usage
+
+Host access vulnerabilities
+
+This tool ensures manifests are safe, correct, and production-ready before they reach your cluster.
+
+🌍 Who Should Use This?
+
+Platform Engineers
+
+DevOps Teams
+
+SREs
+
+Cloud Security Engineers
+
+Students learning Kubernetes Best Practices
+
+Companies enforcing secure deployments
+
+🛠 Tech Stack
+Component	Technology
+Backend	FastAPI, Python
+Frontend	React, Vite, TypeScript
+Webhook	Kubernetes, TLS, AdmissionReview v1
+CI/CD	Docker image + CLI scanner
+Deployment	Minikube / K8s
+🏆 Project Highlights
+
+Fully open source
+
+Full-stack Kubernetes security tool
+
+Works both inside and outside the cluster
+
+Extensible with your own policy rules
+
+Over 100+ unique GitHub clones already 🚀
+
+Architecture matches real-world enterprise security tools
