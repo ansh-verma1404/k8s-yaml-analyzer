@@ -107,6 +107,7 @@ Frontend	React, Vite, TypeScript
 Webhook	Kubernetes, TLS, AdmissionReview v1
 CI/CD	Docker image + CLI scanner
 Deployment	Minikube / K8s
+
 🏆 Project Highlights
 
 Fully open source
